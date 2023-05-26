@@ -42,19 +42,101 @@ public class ControllerPatient {
 	@PostMapping("/patient/new")
 	public String newPatient(Patient p, Model model) {
 
+		// todo check for blank lines, do if guard statement. if not a-z A-Z etc, then return.
 		// TODO
+//		if () {
+//
+//		}
+		// todo get doctor data of the primary physician for the patient, then check if child or correct field and handle
+		//  then if its good, can continue on setting all the patient info
+		//  name is composite field, primaryid is doctor id(AI)
 
-		/*
-		 * Complete database logic to verify and process new patient
-		 */
-		// remove this fake data.
-		p.setPatientId("300198");
-		model.addAttribute("message", "Registration successful.");
-		model.addAttribute("patient", p);
-		return "patient_show";
+		// try connection
+		try ( Connection con = getConnection(); ) {
+			// need to get the doctor id from the name. split up the name, and then look for the doctor with first last name
+			// this will fail with doctors of same names. ps.getResultSet()
+			int doctor_id = GetPatientDoctorId(p.getPrimaryName(),con);
+
+			// if error, then handle up here.
+			// setup prepared statement and insert SQL statement ( starting at 1)
+			PreparedStatement ps = con.prepareStatement(
+				"INSERT INTO patient(last_name, first_name, birthdate, ssn, street, city, state, zipcode, primaryID) VALUES (?,?,?,?,?,?,?,?,?)",
+					Statement.RETURN_GENERATED_KEYS);
+
+			// https://stackoverflow.com/questions/26097451/preparedstatement-return-generated-keys-and-mysql
+
+			// PATIENT
+			ps.setString(1, p.getLast_name());
+			ps.setString(2, p.getFirst_name());
+			ps.setString(3, p.getBirthdate());
+			ps.setString(4, p.getSsn());
+			ps.setString(5, p.getStreet());
+			ps.setString(6, p.getCity());
+			ps.setString(7, p.getState());
+			ps.setString(8, p.getZipcode());
+			// DOCTOR ID
+			ps.setInt(9,doctor_id );
+
+
+			// todo need to think about getting doctor info for primary physician, check if patient is child
+			//  if child, then pediatrics, if not then ONLY internal or family medicine.
+
+			// set all the fields with the current information in the application fields
+			// execute update
+			// result set?
+			// then add the new patient to the model
+
+			/*
+			 * Complete database logic to verify and process new patient
+			 */
+
+
+
+			model.addAttribute("message", "Registration successful.");
+			model.addAttribute("patient", p);
+			return "patient_show";
+		} catch (SQLException e) {
+			model.addAttribute("message","! SQL Error !"+ e.getMessage());
+			model.addAttribute("patient", p);
+			e.printStackTrace();
+					return "patient_register";
+		}
+
+
+
+
 
 	}
-	
+
+	int GetPatientDoctorId(String doc_name, Connection connection)
+	{
+		String [] names = doc_name.split("\\s+"); // whitespace regex
+		// what to do if name is longer than two words? some could be..
+		if (names.length > 2)
+		{
+			return -1;
+		}
+
+		try {
+			PreparedStatement ps = connection.prepareStatement(
+					"SELECT id FROM doctor WHERE first_name = "+ names[0] +" AND last_name = "+ names[1], //names[names.length-1]
+					Statement.RETURN_GENERATED_KEYS);
+
+			// need resultset
+			ResultSet rs = ps.executeQuery();
+			// todo how to find if there is more than one row in the result set
+			// https://docs.oracle.com/javase/8/docs/api/java/sql/ResultSet.html
+			// get row
+			if ( rs.getRow() > 1 ) return -1;
+
+			int doc_id = rs.getInt("doctorId");
+
+			return doc_id;
+
+		}  catch (SQLException e) {
+			return -1;
+		}
+	}
 	/*
 	 * Request blank form to search for patient by and and id
 	 */
@@ -71,6 +153,10 @@ public class ControllerPatient {
 			Model model) {
 
 		// TODO
+		//  need to use patient_input to find the patient with that id,
+		//  and the query all their information with prepared statement
+		//  then setup a patient just like below, with this queried information to then-
+		//  add to the model to be displayed to the web app
 
 		/*
 		 * code to search for patient by id and name retrieve patient data and primary
@@ -87,9 +173,9 @@ public class ControllerPatient {
 		p.setState("CA");
 		p.setZipcode("99999");
 		p.setPrimaryID(11111);
-		p.setPrimaryName("Dr. Watson");
-		p.setSpecialty("Family Medicine");
-		p.setYears("1992");
+		//p.setPrimaryName("Dr. Watson");
+//		p.setSpecialty("Family Medicine");
+//		p.setYears("1992");
 
 		model.addAttribute("patient", p);
 		return "patient_show";
@@ -114,9 +200,9 @@ public class ControllerPatient {
 		p.setState("CA");
 		p.setZipcode("99999");
 		p.setPrimaryID(11111);
-		p.setPrimaryName("Dr. Watson");
-		p.setSpecialty("Family Medicine");
-		p.setYears("1992");
+		//p.setPrimaryName("Dr. Watson");
+//		p.setSpecialty("Family Medicine");
+//		p.setYears("1992");
 
 		model.addAttribute("patient", p);
 		return "patient_edit";

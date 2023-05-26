@@ -14,7 +14,7 @@ import java.util.Random;
 
 public class Doctor_load_data {
 		
-	static final String DBURL = "jdbc:mysql://localhost:3306/cst363";  // database URL
+	static final String DBURL = "jdbc:mysql://localhost:3306/drugstorechain";  // database URL
 	static final String USERID = "root";
 	static final String PASSWORD = "hahathis15paws";
 	
@@ -87,6 +87,7 @@ public class Doctor_load_data {
 			}
 		} catch (SQLException e) {
 			System.out.println("Error: SQLException "+e.getMessage());
+			e.printStackTrace();
 		}
 	}
 }
