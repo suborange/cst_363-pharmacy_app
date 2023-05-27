@@ -72,12 +72,12 @@ public class Doctor_load_data {
 			// display all rows 
 			System.out.println("All doctors");
 			
-			String sqlSELECT = "select id, last_name, first_name, specialty, practice_since, ssn from doctor";
+			String sqlSELECT = "select doctorId, last_name, first_name, specialty, practice_since, ssn from doctor";
 			ps = conn.prepareStatement(sqlSELECT);
 			// there are no parameter markers to set
 			rs = ps.executeQuery();
 			while (rs.next()) {
-				id = rs.getInt("id");
+				id = rs.getInt("doctorId");
 				String last_name = rs.getString("last_name");
 				String first_name = rs.getString("first_name");
 				String specialty = rs.getString("specialty");

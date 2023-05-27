@@ -49,7 +49,7 @@ public class ControllerPatient {
 //		}
 		// todo get doctor data of the primary physician for the patient, then check if child or correct field and handle
 		//  then if its good, can continue on setting all the patient info
-		//  name is composite field, primaryid is doctor id(AI)
+
 
 		// try connection
 		try ( Connection con = getConnection(); ) {
@@ -60,7 +60,7 @@ public class ControllerPatient {
 			// if error, then handle up here.
 			// setup prepared statement and insert SQL statement ( starting at 1)
 			PreparedStatement ps = con.prepareStatement(
-				"INSERT INTO patient(last_name, first_name, birthdate, ssn, street, city, state, zipcode, primaryID) VALUES (?,?,?,?,?,?,?,?,?)",
+				"INSERT INTO patient(last_name, first_name, birthdate, ssn, street, city, state, zipcode) VALUES (?,?,?,?,?,?,?,?)",
 					Statement.RETURN_GENERATED_KEYS);
 
 			// https://stackoverflow.com/questions/26097451/preparedstatement-return-generated-keys-and-mysql
@@ -75,21 +75,16 @@ public class ControllerPatient {
 			ps.setString(7, p.getState());
 			ps.setString(8, p.getZipcode());
 			// DOCTOR ID
-			ps.setInt(9,doctor_id );
+			//ps.setInt(9,doctor_id );
+
+			// execute insertion
+			ps.execute();
+			// now update patient
+			p.setPrimaryID(doctor_id);
 
 
 			// todo need to think about getting doctor info for primary physician, check if patient is child
 			//  if child, then pediatrics, if not then ONLY internal or family medicine.
-
-			// set all the fields with the current information in the application fields
-			// execute update
-			// result set?
-			// then add the new patient to the model
-
-			/*
-			 * Complete database logic to verify and process new patient
-			 */
-
 
 
 			model.addAttribute("message", "Registration successful.");
@@ -110,26 +105,31 @@ public class ControllerPatient {
 
 	int GetPatientDoctorId(String doc_name, Connection connection)
 	{
-		String [] names = doc_name.split("\\s+"); // whitespace regex
+		String [] names = doc_name.split("\\s+", 2); // whitespace regex
 		// what to do if name is longer than two words? some could be..
-		if (names.length > 2)
-		{
-			return -1;
-		}
+		// todo need to fix this because the name is quite long..
+		//  or maybe just use two fields for first and last name?
+		// just split first word as first name, rest as last name
+		String tfirst_name = names[0];
+		String tlast_name = names[1];
+
 
 		try {
 			PreparedStatement ps = connection.prepareStatement(
-					"SELECT id FROM doctor WHERE first_name = "+ names[0] +" AND last_name = "+ names[1], //names[names.length-1]
+					"SELECT doctorId FROM doctor WHERE first_name =? AND last_name =?",
 					Statement.RETURN_GENERATED_KEYS);
+			ps.setString(1, tfirst_name);
+			ps.setString(2,tlast_name);
 
 			// need resultset
 			ResultSet rs = ps.executeQuery();
 			// todo how to find if there is more than one row in the result set
 			// https://docs.oracle.com/javase/8/docs/api/java/sql/ResultSet.html
 			// get row
-			if ( rs.getRow() > 1 ) return -1;
-
-			int doc_id = rs.getInt("doctorId");
+			int doc_id = -1; // default to error, should get changed on success
+			if ( rs.next() ){
+				doc_id = rs.getInt("doctorId");
+			}
 
 			return doc_id;
 
