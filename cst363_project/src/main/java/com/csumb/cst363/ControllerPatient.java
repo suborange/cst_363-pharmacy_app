@@ -60,7 +60,7 @@ public class ControllerPatient {
 			// if error, then handle up here.
 			// setup prepared statement and insert SQL statement ( starting at 1)
 			PreparedStatement ps = con.prepareStatement(
-				"INSERT INTO patient(last_name, first_name, birthdate, ssn, street, city, state, zipcode) VALUES (?,?,?,?,?,?,?,?)",
+				"INSERT INTO patient(last_name, first_name, birthdate, ssn, street, city, state, zipcode, doctor_doctorId) VALUES (?,?,?,?,?,?,?,?,?)",
 					Statement.RETURN_GENERATED_KEYS);
 
 			// https://stackoverflow.com/questions/26097451/preparedstatement-return-generated-keys-and-mysql
@@ -75,7 +75,7 @@ public class ControllerPatient {
 			ps.setString(7, p.getState());
 			ps.setString(8, p.getZipcode());
 			// DOCTOR ID
-			//ps.setInt(9,doctor_id );
+			ps.setInt(9,doctor_id );
 
 			// execute insertion
 			ps.execute();
