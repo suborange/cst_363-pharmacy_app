@@ -58,11 +58,11 @@ public class ManagerReport {
 
 
              // query
-             String SQLSelect = "SELECT tradeName, genericName, quantity FROM drug " +
+             String SQLSelect = "SELECT tradeName, genericName, SUM(quantity) FROM drug " +
                      " JOIN doctor_prescription ON drug.drugid = doctor_prescription.drug_drugid" +
                      " JOIN fill ON fill.doctor_prescription_RXnumber = doctor_prescription.RXnumber" +
                      " JOIN pharmacy ON pharmacy.pharmacyid = fill.pharmacy_pharmacyid" +
-                     " WHERE pharmacyid = ? AND fill.dateFilled BETWEEN DATE ? AND ?" ;
+                     " WHERE pharmacyid = ? AND fill.dateFilled BETWEEN DATE ? AND ? GROUP BY tradeName, genericName" ;
 
              PreparedStatement ps = con.prepareStatement(SQLSelect);
              ps.setString(1, pharmacy_id);
@@ -92,7 +92,7 @@ public class ManagerReport {
                  System.out.println("Quantity: " + manager_report.getString("quantity"));*/
                  String trade_name = manager_report.getString("tradeName");
                  String generic_name = manager_report.getString("genericName");
-                 String quantity = manager_report.getString("quantity");
+                 String quantity = manager_report.getString("SUM(quantity)");
 
 
                  System.out.printf("%-20s  %-20s %14s \n", trade_name , generic_name, quantity);
