@@ -245,9 +245,9 @@ public class DataGenerate {
                 patientIds.add(rs.getInt("patientId"));
             }
 
-            // Used to generate unique six digit RXNumbers
-            List<Integer> randomNums = new ArrayList<>(900000);
-            for (int i = 1; i< 10001; i++) {
+            // Used to generate unique ten digit RXNumbers
+            List<Integer> randomNums = new ArrayList<>(999999);
+            for (int i = 1; i < 999999; i++) {
                 randomNums.add(i);
             }
             Collections.shuffle(randomNums, gen);
@@ -266,7 +266,7 @@ public class DataGenerate {
 
             // Insert 100 rows with data
             for (int k=1; k<=100; k++) {
-                int random_rx_number = 100000+randomNums.get(k);
+                int random_rx_number = 1000000000+randomNums.get(k);
                 int random_drug_id = 1 + gen.nextInt(99);
                 int random_quantity = gen.nextInt(121);
                 c.set(Calendar.YEAR,  2020+gen.nextInt(3));

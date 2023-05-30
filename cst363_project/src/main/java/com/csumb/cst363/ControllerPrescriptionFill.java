@@ -63,7 +63,8 @@ public class ControllerPrescriptionFill {
 			ps = con.prepareStatement("select dp.RXnumber, dp.quantity, doc.first_name, doc.last_name, doc.ssn, d.TradeName, dpc.pharma_corp_name, pp.price " +
 					"from doctor_prescription dp, doctor doc, drug d, drug_has_pharma_corp dpc, drug_has_prescription dhp, pharmacy_prescription pp " +
 					"where dp.doctor_doctorid = doc.doctorId AND dp.drug_drugsid = d.drugid AND d.drugid = dpc.drug_drugid AND d.drugid = dhp.drug_prescriptionid AND dhp.pharmacy_prescription_drugKey = pp.drugKey" +
-					" AND dp.RXnumber = " + p.getRxid());
+					" AND dp.RXnumber = ?");
+			ps.setInt(1, p.getRxid());
 			rs = ps.executeQuery();
 			while (rs.next()) {
 				rxNumber = rs.getInt("RXnumber");
@@ -82,7 +83,9 @@ public class ControllerPrescriptionFill {
 			}
 			// Retrieve matching pharmacy info based on user input
 			int pharmacyId = 0;
-			ps = con.prepareStatement("select pharmacyId, phonenumber from pharmacy where name = '" + p.getPharmacyName() + "' AND address = '" + p.getPharmacyAddress() + "'");
+			ps = con.prepareStatement("select pharmacyId, phonenumber from pharmacy where name = ? AND address = ?");
+			ps.setString(1, p.getPharmacyName());
+			ps.setString(2, p.getPharmacyAddress());
 			rs = ps.executeQuery();
 			while (rs.next()) {
 				pharmacyId = rs.getInt("pharmacyId");
@@ -94,7 +97,8 @@ public class ControllerPrescriptionFill {
 			}
 			// Retrieve matching patient info based on user input
 			int patientId = 0;
-			ps = con.prepareStatement("select patientId, first_name, last_name, ssn from patient where last_name = '" + p.getPatientLastName() + "'");
+			ps = con.prepareStatement("select patientId, first_name, last_name, ssn from patient where last_name = ?");
+			ps.setString(1, p.getPatientLastName());
 			rs = ps.executeQuery();
 			while (rs.next()) {
 				patientId = rs.getInt("patientId");

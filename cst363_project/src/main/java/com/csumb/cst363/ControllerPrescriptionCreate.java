@@ -61,7 +61,9 @@ public class ControllerPrescriptionCreate {
 		try (Connection con = getConnection();) {
 			// Retrieve matching drugId based on user input
 			int drugid = 0;
-			ps = con.prepareStatement("select drugid from drug where tradeName = '" + p.getDrugName() + "' OR genericName = '" + p.getDrugName() + "'");
+			ps = con.prepareStatement("select drugid from drug where tradeName = ? OR genericName = ?");
+			ps.setString(1, p.getDrugName());
+			ps.setString(2, p.getDrugName() );
 			rs = ps.executeQuery();
 			while (rs.next()) {
 				drugid = rs.getInt("drugid");
@@ -84,8 +86,12 @@ public class ControllerPrescriptionCreate {
 			}
 
 			// Retrieve matching doctorId based on user input
+			// If doctor name or ssn is invalid, an error is thrown
 			int doctorId = 0;
-			ps = con.prepareStatement("select doctorId from doctor where last_name = '" + p.getDoctorLastName() + "' AND first_name = '" + p.getDoctorFirstName() + "' AND ssn = '" + p.getDoctor_ssn() + "'");
+			ps = con.prepareStatement("select doctorId from doctor where last_name = ? AND first_name = ? AND ssn = ?");
+			ps.setString(1, p.getDoctorLastName());
+			ps.setString(2, p.getDoctorFirstName());
+			ps.setString(3, p.getDoctor_ssn());
 			rs = ps.executeQuery();
 			while (rs.next()) {
 				doctorId = rs.getInt("doctorId");
@@ -94,8 +100,12 @@ public class ControllerPrescriptionCreate {
 				throw new SQLException("Doctor not found. Please check doctor details and resubmit.");
 			}
 			// Retrieve matching patientId based on user input
+			// If patient name or ssn is invalid, an error is thrown
 			int patientId = 0;
-			ps = con.prepareStatement("select patientId from patient where last_name = '" + p.getPatientLastName() + "' AND first_name = '" + p.getPatientFirstName() + "' AND ssn = '" + p.getPatient_ssn() + "'");
+			ps = con.prepareStatement("select patientId from patient where last_name = ? AND first_name = ? AND ssn = ?");
+			ps.setString(1, p.getPatientLastName());
+			ps.setString(2, p.getPatientFirstName());
+			ps.setString(3, p.getPatient_ssn());
 			rs = ps.executeQuery();
 			while (rs.next()) {
 				patientId = rs.getInt("patientId");
