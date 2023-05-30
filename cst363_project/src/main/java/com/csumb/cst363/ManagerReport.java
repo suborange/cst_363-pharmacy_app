@@ -65,6 +65,7 @@ public class ManagerReport {
                      " WHERE pharmacyid = ? AND fill.dateFilled BETWEEN DATE ? AND ? GROUP BY tradeName, genericName" ;
 
              PreparedStatement ps = con.prepareStatement(SQLSelect);
+
              ps.setString(1, pharmacy_id);
              ps.setDate(2, java.sql.Date.valueOf(start_date));
              ps.setDate(3, java.sql.Date.valueOf(end_date));
@@ -113,6 +114,10 @@ public class ManagerReport {
              System.out.println("SQL ERROR: " + e.getMessage());
              e.printStackTrace();
 
+         } catch (IllegalArgumentException e)
+         {
+             System.out.println("SQL Invalid Input ERROR: " + e.getMessage());
+             e.printStackTrace();
          }
 
 
