@@ -26,6 +26,9 @@ public class ControllerPatient {
 	
 	@Autowired
 	private JdbcTemplate jdbcTemplate;
+	private static final String child_specialty = "Pediatrics";
+	private static final String[] invalid_specialties = { "Orthpedics", "Dermatology",
+			"Cardiology", "Gynecology", "Gastroenterology", "Psychiatry", "Oncology"};
 	
 	/*
 	 * Request blank patient registration form.
@@ -42,17 +45,40 @@ public class ControllerPatient {
 	@PostMapping("/patient/new")
 	public String newPatient(Patient p, Model model) {
 
-		// todo check for blank lines, do if guard statement. if not a-z A-Z etc, then return.
-		// TODO
+		// try connection
+		try ( Connection con = getConnection(); ) {
+			// todo check for blank lines, do if guard statement. if not a-z A-Z etc, then return.
+			// TODO
 //		if () {
 //
 //		}
-		// todo get doctor data of the primary physician for the patient, then check if child or correct field and handle
-		//  then if its good, can continue on setting all the patient info
+			// todo get doctor data of the primary physician for the patient, then check if child or correct field and handle
+			//  then if its good, can continue on setting all the patient info
+
+			// if doctor is pediatrics and patient is child or not
+			// pediatrics is under 16 years of age, so {current date} - {patient.birthdate} = age, should be less than 16
+			String doc_specialty = GetDoctorSpecialty(p.getPrimaryName(), con);
+			// check for child
+			if (doc_specialty.compareTo(child_specialty) == 0 ) {
+				// found child input
+				// now find the age of patient and branch accordingly
+
+			}
+
+			// other invalid options
+			for (String invalid_spec : invalid_specialties) {
+				if (doc_specialty.compareTo(invalid_spec) == 0 ) {
+					// found invalid input
+					model.addAttribute("message","Invalid Doctor Specialty, please re-enter");
+					return "patient_register";
+
+				}
+			}
 
 
-		// try connection
-		try ( Connection con = getConnection(); ) {
+
+
+
 			// need to get the doctor id from the name. split up the name, and then look for the doctor with first last name
 			// this will fail with doctors of same names. ps.getResultSet()
 			int doctor_id = GetPatientDoctorId(p.getPrimaryName(),con);
@@ -98,9 +124,6 @@ public class ControllerPatient {
 		}
 
 
-
-
-
 	}
 
 	int GetPatientDoctorId(String doc_name, Connection connection)
@@ -137,6 +160,40 @@ public class ControllerPatient {
 			return -1;
 		}
 	}
+
+
+	String GetDoctorSpecialty(String doc_name, Connection connection) {
+		// search for the doctor, and get the specialty from them and return this as a string!
+		String [] names = doc_name.split("\\s+", 2); // whitespace regex
+
+		// just split first word as first name, rest as last name
+		String tfirst_name = names[0];
+		String tlast_name = names[1];
+
+		try {
+			PreparedStatement ps = connection.prepareStatement(
+					"SELECT specialty FROM doctor WHERE first_name =? AND last_name =?",
+					Statement.RETURN_GENERATED_KEYS);
+			ps.setString(1, tfirst_name);
+			ps.setString(2, tlast_name);
+
+			ResultSet rs = ps.executeQuery();
+			String tstr = "null";
+			if (rs.next()) {
+				tstr = rs.getString("specialty");
+
+			}
+			return tstr;
+
+		} catch (SQLException e) {
+			// error
+			return null;
+
+		}
+
+
+	}
+
 	/*
 	 * Request blank form to search for patient by and and id
 	 */
