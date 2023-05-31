@@ -5,6 +5,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -12,6 +14,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+
+import javax.validation.ValidationException;
 
 
 @Controller    
@@ -40,22 +44,176 @@ public class ControllerPrescriptionCreate {
 	 */
 	@PostMapping("/prescription")
 	public String newPrescription( Prescription p, Model model) {
-		
-		
-		// TODO 
-		
-		// set fake data for auto-generated prescription id.
-		p.setRxid("RX1980031234");
-		
-		model.addAttribute("message", "Prescription created.");
-		model.addAttribute("prescription", p);
-		return "prescription_show";
+		// Used to generate unique ten digit RXNumbers
+		Random gen = new Random();
+		List<Integer> randomNums = new ArrayList<>(999999);
+		for (int i = 1; i < 999999; i++) {
+			randomNums.add(i);
+		}
+
+		Collections.shuffle(randomNums, gen);
+		int random_rx_number = 1000000000+randomNums.get(1);
+		p.setRxid(random_rx_number);
+
+		PreparedStatement ps;
+		ResultSet rs;
+		// TODO
+		try (Connection con = getConnection();) {
+			// Retrieve matching drugId based on user input
+			int drugid = 0;
+			ps = con.prepareStatement("select drugid from drug where tradeName = ? OR genericName = ?");
+			ps.setString(1, p.getDrugName());
+			ps.setString(2, p.getDrugName() );
+			rs = ps.executeQuery();
+			while (rs.next()) {
+				drugid = rs.getInt("drugid");
+			}
+			// Check for existence of entered drug name in db
+			if (drugid == 0) {
+				throw new SQLException("Drug not found. Please check drug name and resubmit.");
+			}
+
+			// Validate doctor ssn is a 9 digit number
+			int doctorSsnLength = String.valueOf(p.getDoctor_ssn()).length();
+			if (doctorSsnLength != 9) {
+				throw new ValidationException("Doctor SSN must be a 9 digit number.");
+			}
+
+			// Validate patient ssn is a 9 digit number
+			int patientSsnLength = String.valueOf(p.getPatient_ssn()).length();
+			if (patientSsnLength != 9) {
+				throw new ValidationException("Patient SSN must be a 9 digit number.");
+			}
+
+			// Retrieve matching doctorId based on user input
+			// If doctor name or ssn is invalid, an error is thrown
+			int doctorId = 0;
+			ps = con.prepareStatement("select doctorId from doctor where last_name = ? AND first_name = ? AND ssn = ?");
+
+			// Validate doctor last name
+			if (p.getDoctorLastName().isBlank()) {
+				throw new ValidationException("Patient last name can only contain characters a-z and A-Z and cannot be blank");
+			}
+			// Validate doctor first name
+			if (p.getPatientFirstName().isBlank()) {
+				throw new ValidationException("Doctor first name can only contain characters a-z and A-Z and cannot be blank");
+			}
+			// Validate doctor ssn
+			if (!validateSSN(p.getDoctor_ssn())) {
+				throw new ValidationException("Invalid doctor ssn entered");
+			}
+
+			ps.setString(1, p.getDoctorLastName());
+			ps.setString(2, p.getDoctorFirstName());
+			ps.setString(3, p.getDoctor_ssn());
+			rs = ps.executeQuery();
+			while (rs.next()) {
+				doctorId = rs.getInt("doctorId");
+			}
+			if (doctorId == 0) {
+				throw new SQLException("Doctor not found. Please check doctor details and resubmit.");
+			}
+			// Retrieve matching patientId based on user input
+			// If patient name or ssn is invalid, an error is thrown
+			int patientId = 0;
+			ps = con.prepareStatement("select patientId from patient where last_name = ? AND first_name = ? AND ssn = ?");
+
+			// Validate patient last name
+			if (!isAlpha(p.getPatientLastName()) || p.getPatientLastName().isBlank()) {
+				throw new ValidationException("Patient last name can only contain characters a-z and A-Z and cannot be blank");
+			}
+			// Validate patient first name
+			if (!isAlpha(p.getPatientFirstName()) || p.getPatientFirstName().isBlank()) {
+				throw new ValidationException("Patient first name can only contain characters a-z and A-Z and cannot be blank");
+			}
+
+			// Validate doctor ssn
+			if (!validateSSN(p.getPatient_ssn())) {
+				throw new ValidationException("Invalid doctor ssn entered");
+			}
+
+			ps.setString(1, p.getPatientLastName());
+			ps.setString(2, p.getPatientFirstName());
+			ps.setString(3, p.getPatient_ssn());
+			rs = ps.executeQuery();
+			while (rs.next()) {
+				patientId = rs.getInt("patientId");
+			}
+			// Check for existence of entered patient in db
+			if (patientId == 0) {
+				throw new SQLException("Patient not found. Please check patient details and resubmit.");
+			}
+			int quantity = p.getQuantity();
+
+			// Validate quantity is a number between 1 and 120
+			if (quantity < 1 || quantity > 120) {
+				throw new ValidationException("Quantity must be a number between 1 and 120");
+			}
+			ps = con.prepareStatement("insert into doctor_prescription(RXnumber, drug_drugsid, quantity, datePrescribed, doctor_doctorId, patient_patientId) values( ?, ?, ?, ?, ?, ?)",
+					Statement.RETURN_GENERATED_KEYS);
+			ps.setInt(1, random_rx_number);
+			ps.setInt(2, drugid);
+			ps.setInt(3, p.getQuantity());
+			ps.setString(4, new SimpleDateFormat("YYYY-MM-dd").format(new Date()));
+			ps.setInt(5, doctorId);
+			ps.setInt(6, patientId);
+
+			ps.executeUpdate();
+			rs = ps.getGeneratedKeys();
+
+			// display message and patient information
+			model.addAttribute("message", "Prescription created.");
+			model.addAttribute("doctor_prescription", p);
+			return "prescription_show";
+
+		} catch (SQLException e) {
+			model.addAttribute("message", "SQL Error: "+e.getMessage());
+			model.addAttribute("doctor_prescription", p);
+			return "prescription_create";
+		}
+		catch (ValidationException e) {
+			model.addAttribute("message", "Validation Error: "+e.getMessage());
+			model.addAttribute("doctor_prescription", p);
+			return "prescription_create";
+		}
 	}
-	
+
+	// Used to validate that a string only contains alphabetic characters
+	public boolean isAlpha(String name) {
+		return name.matches("[a-zA-Z]+");
+	}
+
+	// Used to validate ssn format
+	public boolean validateSSN(String ssn) {
+		char[] chars = ssn.toCharArray();
+		if (chars.length != 9) {
+			return false;
+		}
+		for (int i = 0; i < chars.length; i++) {
+
+			// Check if character is
+			// not a digit between 0-9
+			// then return false
+			if (chars[i] < '0'
+					|| chars[i] > '9') {
+				return false;
+			}
+		}
+		if (chars[0] == '0' || chars[0] == '9') {
+			return false;
+		}
+		else if (chars[3] == '0' && chars[4] == '0') {
+			return false;
+		}
+		else if (chars[5] == '0' && chars[6] == '0' && chars[7] == '0' && chars[8] == '0') {
+			return false;
+		}
+		return true;
+	}
+
 	/*
 	 * return JDBC Connection using jdbcTemplate in Spring Server
 	 */
-
 	private Connection getConnection() throws SQLException {
 		Connection conn = jdbcTemplate.getDataSource().getConnection();
 		return conn;
