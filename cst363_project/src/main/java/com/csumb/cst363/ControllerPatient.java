@@ -1,11 +1,11 @@
 package com.csumb.cst363;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.sql.Types;
+import java.sql.*;
+import java.util.Calendar;
+import java.util.Date;
+
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -15,6 +15,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+
+
 
 /*
  * Controller class for patient interactions.
@@ -52,7 +54,7 @@ public class ControllerPatient {
 //		if () {
 //
 //		}
-			// todo get doctor data of the primary physician for the patient, then check if child or correct field and handle
+			// get doctor data of the primary physician for the patient, then check if child or correct field and handle
 			//  then if its good, can continue on setting all the patient info
 
 			// if doctor is pediatrics and patient is child or not
@@ -62,6 +64,36 @@ public class ControllerPatient {
 			if (doc_specialty.compareTo(child_specialty) == 0 ) {
 				// found child input
 				// now find the age of patient and branch accordingly
+				String patient_date_str = p.getBirthdate();
+				SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+				Calendar cal = Calendar.getInstance();
+				Date valid_date = new Date();
+				cal.add(Calendar.YEAR, -16);
+				valid_date = cal.getTime();
+				Date patient_date = sdf.parse(patient_date_str);
+
+				// adult
+				if (patient_date.before(valid_date)) {
+					model.addAttribute("message","Invalid Doctor, you are an adult so please re-enter");
+					return "patient_register";
+				}
+
+			}
+			else {
+				// now find the age of patient and branch accordingly
+				String patient_date_str = p.getBirthdate();
+				SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+				Calendar cal = Calendar.getInstance();
+				Date valid_date = new Date();
+				cal.add(Calendar.YEAR, -16);
+				valid_date = cal.getTime();
+				Date patient_date = sdf.parse(patient_date_str);
+
+				// child
+				if (!patient_date.before(valid_date)) {
+					model.addAttribute("message","Invalid Doctor, you are a child so please re-enter");
+					return "patient_register";
+				}
 
 			}
 
@@ -69,14 +101,10 @@ public class ControllerPatient {
 			for (String invalid_spec : invalid_specialties) {
 				if (doc_specialty.compareTo(invalid_spec) == 0 ) {
 					// found invalid input
-					model.addAttribute("message","Invalid Doctor Specialty, please re-enter");
+					model.addAttribute("message","Invalid Doctor, please re-enter");
 					return "patient_register";
-
 				}
 			}
-
-
-
 
 
 			// need to get the doctor id from the name. split up the name, and then look for the doctor with first last name
@@ -121,6 +149,8 @@ public class ControllerPatient {
 			model.addAttribute("patient", p);
 			e.printStackTrace();
 					return "patient_register";
+		} catch (ParseException e) {
+			throw new RuntimeException(e);
 		}
 
 

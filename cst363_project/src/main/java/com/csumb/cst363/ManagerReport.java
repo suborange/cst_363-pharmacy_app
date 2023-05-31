@@ -53,9 +53,6 @@ public class ManagerReport {
              System.out.println("Please enter the ending date in yyyy-mm-dd format: ");
              end_date = input.nextLine();
 
-             // validate values?
-
-
 
              // query
              String SQLSelect = "SELECT tradeName, genericName, SUM(quantity) FROM drug " +
@@ -70,44 +67,23 @@ public class ManagerReport {
              ps.setDate(2, java.sql.Date.valueOf(start_date));
              ps.setDate(3, java.sql.Date.valueOf(end_date));
 
+             // get results set
              ResultSet manager_report = ps.executeQuery();
              System.out.println("-------------------------------------------------------------");
              System.out.printf("%-20s  %-20s %14s \n", "Trade Name","Generic Name","Quantity");
              System.out.println("-------------------------------------------------------------");
-   /*          String trade_name; // = manager_report.getString("tradeName");
-             String generic_name;// = manager_report.getString("genericName");
-             String quantity;// = manager_report.getString("quantity");
-             trade_name="testing1";
-             generic_name="testing1";
-             quantity="testing1";
 
-             System.out.printf("%-20s  %-20s %4s \n", trade_name , generic_name, quantity);
-             System.out.printf("%-20s  %-20s %4s \n", trade_name , generic_name, quantity);
-             System.out.printf("%-20s  %-20s %4s \n", trade_name , generic_name, quantity);
-             System.out.printf("%-20s  %-20s %4s \n", trade_name , generic_name, quantity);
-             System.out.printf("%-20s  %-20s %4s \n", trade_name , generic_name, quantity);*/
 
              while (manager_report.next()) {
-                 /*System.out.println("Trade name: " + manager_report.getString("tradeName"));
-                 System.out.println("Generic Name: "+ manager_report.getString("genericName"));
-                 System.out.println("Quantity: " + manager_report.getString("quantity"));*/
+                 // display everything
+
                  String trade_name = manager_report.getString("tradeName");
                  String generic_name = manager_report.getString("genericName");
                  String quantity = manager_report.getString("SUM(quantity)");
-
-
                  System.out.printf("%-20s  %-20s %14s \n", trade_name , generic_name, quantity);
-
              }
 
              System.out.println("-------------------------------------------------------------");
-
-             // get results set
-
-             // display everything
-
-
-
 
 
          } catch (SQLException e ) {
