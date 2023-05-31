@@ -15,10 +15,11 @@ public class Patient {
 	private String state;
 	private String zipcode;
 	// following fields are data about primary doctor
-	private int primaryID;       
-	private String primaryName;  
-	private String specialty;    
-	private String years;       
+	private int primaryID;
+	// not in our schema
+	private String primaryName;
+//	private String specialty;
+//	private String years;
 
 	
 	public String getPatientId() {
@@ -64,18 +65,18 @@ public class Patient {
 	public void setPrimaryName(String primaryName) {
 		this.primaryName = primaryName;
 	}
-	public String getSpecialty() {
-		return specialty;
-	}
-	public void setSpecialty(String specialty) {
-		this.specialty = specialty;
-	}
-	public String getYears() {
-		return years;
-	}
-	public void setYears(String years) {
-		this.years = years;
-	}
+//	public String getSpecialty() {
+//		return specialty;
+//	}
+//	public void setSpecialty(String specialty) {
+//		this.specialty = specialty;
+//	}
+//	public String getYears() {
+//		return years;
+//	}
+//	public void setYears(String years) {
+//		this.years = years;
+//	}
 	public String getStreet() {
 		return street;
 	}
@@ -105,6 +106,6 @@ public class Patient {
 		return "Patient [patientId=" + patientId + ", last_name=" + last_name + ", first_name=" + first_name
 				+ ", birthdate=" + birthdate + ", ssn=" + ssn + ", street=" + street + ", city=" + city + ", state="
 				+ state + ", zipcode=" + zipcode + ", primaryID=" + primaryID + ", primaryName=" + primaryName
-				+ ", specialty=" + specialty + ", years=" + years + "]";
+				+ "]";
 	}
 }

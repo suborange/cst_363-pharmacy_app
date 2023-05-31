@@ -19,11 +19,13 @@ public class Doctor_load_data {
 		
 	static final String DBURL = "jdbc:mysql://localhost:3306/drugstorechain";  // database URL
 
+
 	// Replace USERID with correct user info
 	static final String USERID = "";
 
 	// Replace PASSWORD with correct password info
 	static final String PASSWORD = "";
+
 	
 	static final String[] specialties= {"Internal Medicine", "Family Medicine", "Pediatrics", "Orthpedics", "Dermatology", 
 			"Cardiology", "Gynecology", "Gastroenterology", "Psychiatry", "Oncology"};
@@ -100,6 +102,7 @@ public class Doctor_load_data {
 			}
 		} catch (SQLException e) {
 			System.out.println("Error: SQLException "+e.getMessage());
+			e.printStackTrace();
 		}
 	}
 }

@@ -84,7 +84,7 @@ public class ControllerDoctor {
 		try (Connection con = getConnection();) {
 			// for DEBUG 
 			System.out.println("start getDoctor "+doctor);
-			PreparedStatement ps = con.prepareStatement("select last_name, first_name, specialty, practice_since from doctor where id=? and last_name=?");
+			PreparedStatement ps = con.prepareStatement("select last_name, first_name, specialty, practice_since from doctor where doctorId=? and last_name=?");
 			ps.setInt(1, doctor.getId());
 			ps.setString(2, doctor.getLast_name());
 			
