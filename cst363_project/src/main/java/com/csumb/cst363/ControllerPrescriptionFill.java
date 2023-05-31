@@ -65,14 +65,6 @@ public class ControllerPrescriptionFill {
 					"where dp.doctor_doctorid = doc.doctorId AND dp.drug_drugsid = d.drugid AND d.drugid = dpc.drug_drugid AND d.drugid = dhp.drug_prescriptionid AND dhp.pharmacy_prescription_drugKey = pp.drugKey" +
 					" AND dp.RXnumber = ?");
 			ps.setInt(1, p.getRxid());
-			// Validate doctor first name
-			if (p.getDoctorFirstName().isBlank()) {
-				throw new ValidationException("Doctor First Name can not be blank");
-			}
-			// Validate doctor last name
-			if (p.getDoctorLastName().isBlank()) {
-				throw new ValidationException("Doctor Last Name can not be blank");
-			}
 			rs = ps.executeQuery();
 			while (rs.next()) {
 				rxNumber = rs.getInt("RXnumber");
@@ -92,6 +84,14 @@ public class ControllerPrescriptionFill {
 			// Retrieve matching pharmacy info based on user input
 			int pharmacyId = 0;
 			ps = con.prepareStatement("select pharmacyId, phonenumber from pharmacy where name = ? AND address = ?");
+			// Validate doctor first name
+			if (p.getPharmacyName().isBlank()) {
+				throw new ValidationException("Pharmacy Name can not be blank");
+			}
+			// Validate doctor last name
+			if (p.getPharmacyAddress().isBlank()) {
+				throw new ValidationException("Pharmacy Address can not be blank");
+			}
 			ps.setString(1, p.getPharmacyName());
 			ps.setString(2, p.getPharmacyAddress());
 			rs = ps.executeQuery();
