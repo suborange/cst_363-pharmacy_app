@@ -174,7 +174,7 @@ public class DataGenerate {
                 String random_street = streetNames[gen.nextInt(streetNames.length)];
                 String random_city = cities[gen.nextInt(cities.length)];
                 String random_state = states[gen.nextInt(states.length)];
-                String random_zipcode = Integer.toString(200000+gen.nextInt(799999));
+                String random_zipcode = Integer.toString(20000+gen.nextInt(79999));
                 int random_doctorId = doctorIds.get(gen.nextInt(doctorIds.size()));
 
                 ps.setString(1,  random_last_name);

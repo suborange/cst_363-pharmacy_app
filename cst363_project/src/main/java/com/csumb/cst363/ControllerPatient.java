@@ -175,7 +175,7 @@ public class ControllerPatient {
 			// if error, then handle up here.
 			// setup prepared statement and insert SQL statement ( starting at 1)
 			PreparedStatement ps = con.prepareStatement(
-				"INSERT INTO patient(last_name, first_name, birthdate, ssn, street, city, state, zipcode, doctor_doctorId) VALUES (?,?,?,?,?,?,?,?,?)",
+				"INSERT INTO patient(last_name, first_name, birthdate, ssn, street, city, state, zipcode, doctors_doctorId) VALUES (?,?,?,?,?,?,?,?,?)",
 					Statement.RETURN_GENERATED_KEYS);
 
 			// https://stackoverflow.com/questions/26097451/preparedstatement-return-generated-keys-and-mysql
@@ -563,37 +563,6 @@ public class ControllerPatient {
 			var2.printStackTrace();
 			return false;
 		}
-	}
-
-	public boolean isAlpha(String name) {
-		return name.matches("[a-zA-Z]+");
-	}
-
-	public boolean validateSSN(String ssn) {
-		char[] chars = ssn.toCharArray();
-		if (chars.length != 9) {
-			return false;
-		}
-		for (int i = 0; i < chars.length; i++) {
-
-			// Check if character is
-			// not a digit between 0-9
-			// then return false
-			if (chars[i] < '0'
-					|| chars[i] > '9') {
-				return false;
-			}
-		}
-		if (chars[0] == '0' || chars[0] == '9') {
-			return false;
-		}
-		else if (chars[3] == '0' && chars[4] == '0') {
-			return false;
-		}
-		else if (chars[5] == '0' && chars[6] == '0' && chars[7] == '0' && chars[8] == '0') {
-			return false;
-		}
-		return true;
 	}
 
 }

@@ -19,7 +19,7 @@ public class ManagerReport {
 
     static final String DBURL = "jdbc:mysql://localhost:3306/drugstorechain";  // database URL
     static final String USERID = "root";
-    static final String PASSWORD = "hahathis15paws";
+    static final String PASSWORD = "";
 
     public static void main(String[] args) {
         // get user input for the pharmacy id, start, and end date( for contract? not really sure).
@@ -56,7 +56,7 @@ public class ManagerReport {
 
              // query
              String SQLSelect = "SELECT tradeName, genericName, SUM(quantity) FROM drug " +
-                     " JOIN doctor_prescription ON drug.drugid = doctor_prescription.drug_drugid" +
+                     " JOIN doctor_prescription ON drug.drugid = doctor_prescription.drug_drugsid" +
                      " JOIN fill ON fill.doctor_prescription_RXnumber = doctor_prescription.RXnumber" +
                      " JOIN pharmacy ON pharmacy.pharmacyid = fill.pharmacy_pharmacyid" +
                      " WHERE pharmacyid = ? AND fill.dateFilled BETWEEN DATE ? AND ? GROUP BY tradeName, genericName" ;

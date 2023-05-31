@@ -10,7 +10,7 @@ import java.util.Scanner;
 public class DrugPrescriptionReport {
 
     private static final java.text.SimpleDateFormat sdf =
-            new java.text.SimpleDateFormat("YYYY-MM-dd");
+            new java.text.SimpleDateFormat("yyyy-mm-dd");
     public static void main(String[] args) throws SQLException {
 
         String url = "jdbc:mysql://localhost:3306/DrugStoreChain";

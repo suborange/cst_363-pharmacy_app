@@ -18,8 +18,8 @@ public class Patient {
 	private int primaryID;
 	// not in our schema
 	private String primaryName;
-//	private String specialty;
-//	private String years;
+	private String specialty;
+	private String years;
 
 	
 	public String getPatientId() {
@@ -65,18 +65,18 @@ public class Patient {
 	public void setPrimaryName(String primaryName) {
 		this.primaryName = primaryName;
 	}
-//	public String getSpecialty() {
-//		return specialty;
-//	}
-//	public void setSpecialty(String specialty) {
-//		this.specialty = specialty;
-//	}
-//	public String getYears() {
-//		return years;
-//	}
-//	public void setYears(String years) {
-//		this.years = years;
-//	}
+	public String getSpecialty() {
+		return specialty;
+	}
+	public void setSpecialty(String specialty) {
+		this.specialty = specialty;
+	}
+	public String getYears() {
+		return years;
+	}
+	public void setYears(String years) {
+		this.years = years;
+	}
 	public String getStreet() {
 		return street;
 	}
