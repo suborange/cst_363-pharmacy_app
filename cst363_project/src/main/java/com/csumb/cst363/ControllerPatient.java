@@ -51,27 +51,27 @@ public class ControllerPatient {
 	public String newPatient(Patient p, Model model) {
 		// check for blank lines, do if guard statement. if not a-z A-Z etc, then return.
 
-		if (!isAlpha(p.getFirst_name()) || p.getFirst_name().isEmpty()) {
+		if (!isAlpha(p.getFirst_name()) || p.getFirst_name().isBlank()) {
 			model.addAttribute("message","Invalid patient first name, please re-enter");
 			return "patient_register";
 		}
-		else if (validateSSN(p.getSsn())|| p.getSsn().isEmpty()) {
+		else if (validateSSN(p.getSsn())|| p.getSsn().isBlank()) {
 			model.addAttribute("message","Invalid patient SSN, please re-enter");
 			return "patient_register";
 		}
-		else if (!isAlpha(p.getLast_name())|| p.getLast_name().isEmpty()) {
+		else if (!isAlpha(p.getLast_name())|| p.getLast_name().isBlank()) {
 			model.addAttribute("message","Invalid patient last name, please re-enter");
 			return "patient_register";
 		}
-		else if(!isAlpha(p.getStreet())|| p.getStreet().isEmpty()) {
+		else if(!isAlpha(p.getStreet())|| p.getStreet().isBlank()) {
 			model.addAttribute("message","Invalid patient street name, please re-enter");
 			return "patient_register";
 		}
-		else if (!isAlpha(p.getCity()) || p.getCity().isEmpty() ) {
+		else if (!isAlpha(p.getCity()) || p.getCity().isBlank() ) {
 			model.addAttribute("message","Invalid patient city name, please re-enter");
 			return "patient_register";
 		}
-		else if (!isAlpha(p.getState()) || p.getState().isEmpty()) {
+		else if (!isAlpha(p.getState()) || p.getState().isBlank()) {
 			model.addAttribute("message","Invalid patient state name, please re-enter");
 			return "patient_register";
 		}
@@ -83,7 +83,6 @@ public class ControllerPatient {
 			model.addAttribute("message","Empty doctor name, please re-enter");
 			return "patient_register";
 		}
-
 
 		if (validateDateInput(p.getBirthdate())) {
 			model.addAttribute("message","Invalid Birthdate, please re-enter");
