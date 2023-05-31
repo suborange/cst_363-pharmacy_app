@@ -92,7 +92,7 @@ public class ManagerReport {
 
          } catch (IllegalArgumentException e)
          {
-             System.out.println("SQL Invalid Input ERROR: " + e.getMessage());
+             System.out.println("SQL Invalid User Input. Please run again with correct input. \n ERROR: ");
              e.printStackTrace();
          }
 
