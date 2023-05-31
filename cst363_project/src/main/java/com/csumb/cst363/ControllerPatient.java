@@ -31,6 +31,9 @@ public class ControllerPatient {
 	private static final String child_specialty = "Pediatrics";
 	private static final String[] invalid_specialties = { "Orthpedics", "Dermatology",
 			"Cardiology", "Gynecology", "Gastroenterology", "Psychiatry", "Oncology"};
+
+	private static final java.text.SimpleDateFormat sdf_temp =
+			new java.text.SimpleDateFormat("YYYY-MM-dd");
 	
 	/*
 	 * Request blank patient registration form.
@@ -46,14 +49,50 @@ public class ControllerPatient {
 	 * Process new patient registration	 */
 	@PostMapping("/patient/new")
 	public String newPatient(Patient p, Model model) {
+		// check for blank lines, do if guard statement. if not a-z A-Z etc, then return.
+
+		if (!isAlpha(p.getFirst_name()) || p.getFirst_name().isEmpty()) {
+			model.addAttribute("message","Invalid patient first name, please re-enter");
+			return "patient_register";
+		}
+		else if (validateSSN(p.getSsn())|| p.getSsn().isEmpty()) {
+			model.addAttribute("message","Invalid patient SSN, please re-enter");
+			return "patient_register";
+		}
+		else if (!isAlpha(p.getLast_name())|| p.getLast_name().isEmpty()) {
+			model.addAttribute("message","Invalid patient last name, please re-enter");
+			return "patient_register";
+		}
+		else if(!isAlpha(p.getStreet())|| p.getStreet().isEmpty()) {
+			model.addAttribute("message","Invalid patient street name, please re-enter");
+			return "patient_register";
+		}
+		else if (!isAlpha(p.getCity()) || p.getCity().isEmpty() ) {
+			model.addAttribute("message","Invalid patient city name, please re-enter");
+			return "patient_register";
+		}
+		else if (!isAlpha(p.getState()) || p.getState().isEmpty()) {
+			model.addAttribute("message","Invalid patient state name, please re-enter");
+			return "patient_register";
+		}
+		else if ( p.getZipcode().length() != 5) {
+			model.addAttribute("message","Invalid zipcode, please re-enter");
+			return "patient_register";
+		}
+		else if (p.getPrimaryName().isEmpty()) {
+			model.addAttribute("message","Empty doctor name, please re-enter");
+			return "patient_register";
+		}
+
+
+		if (validateDateInput(p.getBirthdate())) {
+			model.addAttribute("message","Invalid Birthdate, please re-enter");
+			return "patient_register";
+		}
 
 		// try connection
 		try ( Connection con = getConnection(); ) {
-			// todo check for blank lines, do if guard statement. if not a-z A-Z etc, then return.
-			// TODO
-//		if () {
-//
-//		}
+
 			// get doctor data of the primary physician for the patient, then check if child or correct field and handle
 			//  then if its good, can continue on setting all the patient info
 
@@ -315,6 +354,70 @@ public class ControllerPatient {
 	private Connection getConnection() throws SQLException {
 		Connection conn = jdbcTemplate.getDataSource().getConnection();
 		return conn;
+	}
+
+	private static boolean validateDateInput(String dateString) {
+		try {
+			if (!dateString.isEmpty()) {
+				Date date = sdf_temp.parse(dateString.trim());
+				// create calender to extract and check year, month and day
+				Calendar check_date = Calendar.getInstance();
+				check_date.setTime(date);
+				// year between 1900-2022)
+				if (check_date.get(Calendar.YEAR) >= 1900 && check_date.get(Calendar.YEAR) <= 2022)
+				{
+					return sdf_temp.format(date).equals(dateString.trim());
+				}
+				// month between 1-12
+				if ( check_date.get(Calendar.MONTH) >=0  || check_date.get(Calendar.MONTH) < 12)
+				{
+					return sdf_temp.format(date).equals(dateString.trim());
+				}
+				// day between 1-31
+				if (check_date.get(Calendar.DAY_OF_MONTH) >=1 || check_date.get(Calendar.DAY_OF_MONTH) <= 31)
+				{
+					return sdf_temp.format(date).equals(dateString.trim());
+				}
+				return false;
+
+			} else {
+				return false;
+			}
+		} catch (ParseException var2) {
+			var2.printStackTrace();
+			return false;
+		}
+	}
+
+	public boolean isAlpha(String name) {
+		return name.matches("[a-zA-Z]+");
+	}
+
+	public boolean validateSSN(String ssn) {
+		char[] chars = ssn.toCharArray();
+		if (chars.length != 9) {
+			return false;
+		}
+		for (int i = 0; i < chars.length; i++) {
+
+			// Check if character is
+			// not a digit between 0-9
+			// then return false
+			if (chars[i] < '0'
+					|| chars[i] > '9') {
+				return false;
+			}
+		}
+		if (chars[0] == '0' || chars[0] == '9') {
+			return false;
+		}
+		else if (chars[3] == '0' && chars[4] == '0') {
+			return false;
+		}
+		else if (chars[5] == '0' && chars[6] == '0' && chars[7] == '0' && chars[8] == '0') {
+			return false;
+		}
+		return true;
 	}
 
 }
