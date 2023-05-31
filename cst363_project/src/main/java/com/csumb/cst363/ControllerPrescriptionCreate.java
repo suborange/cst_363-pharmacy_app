@@ -129,7 +129,7 @@ public class ControllerPrescriptionCreate {
 
 			// Validate doctor ssn
 			if (!validateSSN(p.getPatient_ssn())) {
-				throw new ValidationException("Invalid doctor ssn entered");
+				throw new ValidationException("Invalid patient ssn entered");
 			}
 
 			ps.setString(1, p.getPatientLastName());
