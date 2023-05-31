@@ -65,6 +65,14 @@ public class ControllerPrescriptionFill {
 					"where dp.doctor_doctorid = doc.doctorId AND dp.drug_drugsid = d.drugid AND d.drugid = dpc.drug_drugid AND d.drugid = dhp.drug_prescriptionid AND dhp.pharmacy_prescription_drugKey = pp.drugKey" +
 					" AND dp.RXnumber = ?");
 			ps.setInt(1, p.getRxid());
+			// Validate doctor first name
+			if (p.getDoctorFirstName().isBlank()) {
+				throw new ValidationException("Doctor First Name can not be blank");
+			}
+			// Validate doctor last name
+			if (p.getDoctorLastName().isBlank()) {
+				throw new ValidationException("Doctor Last Name can not be blank");
+			}
 			rs = ps.executeQuery();
 			while (rs.next()) {
 				rxNumber = rs.getInt("RXnumber");
@@ -98,6 +106,10 @@ public class ControllerPrescriptionFill {
 			// Retrieve matching patient info based on user input
 			int patientId = 0;
 			ps = con.prepareStatement("select patientId, first_name, last_name, ssn from patient where last_name = ?");
+			// Validate patient last name
+			if (!isAlpha(p.getPatientLastName()) || p.getPatientLastName().isBlank()) {
+				throw new ValidationException("Patient last name can only contain characters a-z and A-Z and cannot be blank");
+			}
 			ps.setString(1, p.getPatientLastName());
 			rs = ps.executeQuery();
 			while (rs.next()) {
@@ -142,6 +154,11 @@ public class ControllerPrescriptionFill {
 	/*
 	 * return JDBC Connection using jdbcTemplate in Spring Server
 	 */
+
+	// Used to validate that a string is alphabetic
+	public boolean isAlpha(String name) {
+		return name.matches("[a-zA-Z]+");
+	}
 
 	private Connection getConnection() throws SQLException {
 		Connection conn = jdbcTemplate.getDataSource().getConnection();

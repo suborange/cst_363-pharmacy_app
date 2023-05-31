@@ -89,6 +89,20 @@ public class ControllerPrescriptionCreate {
 			// If doctor name or ssn is invalid, an error is thrown
 			int doctorId = 0;
 			ps = con.prepareStatement("select doctorId from doctor where last_name = ? AND first_name = ? AND ssn = ?");
+
+			// Validate doctor last name
+			if (p.getDoctorLastName().isBlank()) {
+				throw new ValidationException("Patient last name can only contain characters a-z and A-Z and cannot be blank");
+			}
+			// Validate doctor first name
+			if (p.getPatientFirstName().isBlank()) {
+				throw new ValidationException("Doctor first name can only contain characters a-z and A-Z and cannot be blank");
+			}
+			// Validate doctor ssn
+			if (!validateSSN(p.getDoctor_ssn())) {
+				throw new ValidationException("Invalid doctor ssn entered");
+			}
+
 			ps.setString(1, p.getDoctorLastName());
 			ps.setString(2, p.getDoctorFirstName());
 			ps.setString(3, p.getDoctor_ssn());
@@ -103,6 +117,21 @@ public class ControllerPrescriptionCreate {
 			// If patient name or ssn is invalid, an error is thrown
 			int patientId = 0;
 			ps = con.prepareStatement("select patientId from patient where last_name = ? AND first_name = ? AND ssn = ?");
+
+			// Validate patient last name
+			if (!isAlpha(p.getPatientLastName()) || p.getPatientLastName().isBlank()) {
+				throw new ValidationException("Patient last name can only contain characters a-z and A-Z and cannot be blank");
+			}
+			// Validate patient first name
+			if (!isAlpha(p.getPatientFirstName()) || p.getPatientFirstName().isBlank()) {
+				throw new ValidationException("Patient first name can only contain characters a-z and A-Z and cannot be blank");
+			}
+
+			// Validate doctor ssn
+			if (!validateSSN(p.getPatient_ssn())) {
+				throw new ValidationException("Invalid doctor ssn entered");
+			}
+
 			ps.setString(1, p.getPatientLastName());
 			ps.setString(2, p.getPatientFirstName());
 			ps.setString(3, p.getPatient_ssn());
@@ -148,11 +177,43 @@ public class ControllerPrescriptionCreate {
 			return "prescription_create";
 		}
 	}
-	
+
+	// Used to validate that a string only contains alphabetic characters
+	public boolean isAlpha(String name) {
+		return name.matches("[a-zA-Z]+");
+	}
+
+	// Used to validate ssn format
+	public boolean validateSSN(String ssn) {
+		char[] chars = ssn.toCharArray();
+		if (chars.length != 9) {
+			return false;
+		}
+		for (int i = 0; i < chars.length; i++) {
+
+			// Check if character is
+			// not a digit between 0-9
+			// then return false
+			if (chars[i] < '0'
+					|| chars[i] > '9') {
+				return false;
+			}
+		}
+		if (chars[0] == '0' || chars[0] == '9') {
+			return false;
+		}
+		else if (chars[3] == '0' && chars[4] == '0') {
+			return false;
+		}
+		else if (chars[5] == '0' && chars[6] == '0' && chars[7] == '0' && chars[8] == '0') {
+			return false;
+		}
+		return true;
+	}
+
 	/*
 	 * return JDBC Connection using jdbcTemplate in Spring Server
 	 */
-
 	private Connection getConnection() throws SQLException {
 		Connection conn = jdbcTemplate.getDataSource().getConnection();
 		return conn;
